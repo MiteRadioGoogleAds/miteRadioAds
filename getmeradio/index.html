@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MITE Radio: What Do You Want To Hear?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- =====================================================================
+  GOOGLE ADS CONVERSION TRACKING: fill these in before going live
+  1. GA_CONVERSION_ID  -> Google Ads account conversion ID, format "AW-123456789"
+  2. GA_CONVERSION_LABEL -> the label for your "Listen Now click" conversion action
+  See the setup notes sent alongside this file for exactly where to find these.
+===================================================================== -->
+<script>
+  const GA_CONVERSION_ID = "AW-11457055340";
+  const GA_CONVERSION_LABEL = "6Ot9CMbEvvccEOyUk9cq";
+
+  // Where "Listen Now" ultimately sends the visitor. Deploy this same file
+  // TWICE with two different values here: one build pointing to GetMeRadio,
+  // one pointing to the MITE Radio homepage, to run that destination test
+  // through this page (Google Ads can't split-test a destination that lives
+  // behind a click on your own page, so each variant needs its own copy).
+  const LISTEN_NOW_URL = "https://www.getmeradio.com/stations/miteradio-9155/"; // <-- swap per deployment
+
+  // Where story submissions go: your Google Apps Script Web App URL
+  // (see apps-script.gs). Submissions land in your Sheet and email you.
+  const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycbxfT7lsiY7QF7JsgT0sqTv2l-iyAmxQHLJP8zhNfDUyFen6OKQXUE1vYSSM60ef8ukO/exec";
+
+  const datePrime = "Test";
+
+  // Support/donate link shown after submission. TODO: replace with your
+  // real donation page — none was found on miteradio.com.au yet.
+  const DONATE_URL = "https://www.miteradio.com.au/";
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-11457055340"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', GA_CONVERSION_ID);
+
+  // Redirects the whole browser tab, not just the box this page sits in,
+  // in case it's embedded inside another page's iframe (e.g. Google Sites).
+  function goTop(url){
+    try { (window.top || window).location.href = url; }
+    catch(e){ window.location.href = url; }
+  }
+
+  function fireListenConversion(destination){
+    if (typeof gtag === 'function') {
+      gtag('event', 'conversion', {
+        'send_to': GA_CONVERSION_ID + '/' + GA_CONVERSION_LABEL,
+        'event_callback': function(){ goTop(destination); }
+      });
+      // Safety net: if the callback never fires (blocker, slow network), still leave.
+      setTimeout(function(){ goTop(destination); }, 600);
+    } else {
+      goTop(destination);
+    }
+  }
+</script>
+
+<style>
+  :root{
+    --blue-deep:#0B4F9E;
+    --blue-bright:#0EA5E9;
+    --blue-mid:#2B7BE0;
+    --amber:#FDB813;
+    --amber-deep:#F08C00;
+    --ink:#152238;
+    --ink-soft:#4A5A72;
+    --paper:#FFFFFF;
+    --cloud:#F3F8FF;
+    --line:#E1E9F5;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  a{text-decoration:none;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:var(--cloud);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Poppins',sans-serif; margin:0;}
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1000px; margin:0 auto; padding:0 20px;}
+
+  /* ---------- HERO (top third) ---------- */
+  .hero{
+    background:linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-mid) 55%, var(--blue-bright) 100%);
+    color:#fff;
+    padding:48px 0 40px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:auto -10% -60% -10%;
+    height:200px;
+    background:rgba(255,255,255,0.08);
+    transform:rotate(-3deg);
+  }
+  .hero-inner{position:relative; text-align:center;}
+  .hero-kicker{
+    display:inline-block;
+    background:rgba(253,184,19,0.18);
+    color:var(--amber);
+    border:1px solid rgba(253,184,19,0.4);
+    padding:6px 16px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:clamp(32px, 6vw, 52px);
+    font-weight:800;
+    line-height:1.05;
+    margin-bottom:6px;
+  }
+  .hero .tagline{
+    font-size:clamp(16px, 2.4vw, 20px);
+    font-weight:600;
+    color:var(--amber);
+    margin-bottom:18px;
+  }
+  .hero p{
+    max-width:640px;
+    margin:0 auto;
+    font-size:16px;
+    line-height:1.6;
+    color:rgba(255,255,255,0.92);
+  }
+  .hero .badge-row{
+    margin-top:22px;
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+    font-size:13px;
+    font-weight:600;
+  }
+  .hero .badge-row span{
+    background:rgba(255,255,255,0.14);
+    padding:7px 14px 7px 10px;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+  }
+  .hero .badge-row svg{width:16px; height:16px; flex-shrink:0;}
+  .broadcast-icon{
+    position:absolute;
+    top:8px; right:2%;
+    width:clamp(90px,14vw,140px);
+    height:clamp(90px,14vw,140px);
+    color:#fff;
+    opacity:0.22;
+  }
+  .play-now-btn{
+    display:inline-flex; align-items:center; gap:9px;
+    background:linear-gradient(90deg,var(--amber),var(--amber-deep));
+    color:var(--ink);
+    border:none; border-radius:999px;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:15.5px;
+    padding:13px 28px;
+    margin:26px 0 20px;
+    cursor:pointer;
+    box-shadow:0 10px 22px rgba(240,140,0,0.35);
+  }
+  .play-now-btn:hover{filter:brightness(1.05);}
+  .play-now-btn svg{width:16px; height:16px;}
+  .hero-message{
+    display:none;
+    color:var(--amber-deep);
+    background:#FFF6E0;
+    border:1px solid rgba(240,140,0,0.35);
+    border-radius:12px;
+    padding:12px 16px;
+    font-weight:600;
+    font-size:14.5px;
+    margin-bottom:18px;
+  }
+
+  /* ---------- PARTNERS STRIP (inside the questionnaire card) ---------- */
+  .partners-inline{margin-bottom:26px; padding-bottom:22px; border-bottom:1px solid var(--line);}
+  .partners-inline h3{
+    text-align:center; font-size:13px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--blue-mid); margin-bottom:14px;
+  }
+  .marquee{overflow:hidden; width:100%; -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent); mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
+  .marquee-track{display:flex; align-items:center; gap:44px; width:max-content; animation:marquee 70s linear infinite;}
+  .marquee-track img{height:32px; width:auto; flex-shrink:0; filter:grayscale(15%); opacity:.85;}
+  .marquee-track:hover{animation-play-state:paused;}
+  @keyframes marquee{from{transform:translateX(0);} to{transform:translateX(-50%);}}
+
+  /* ---------- FORM (center) ---------- */
+  .form-section{margin:-34px auto 56px; position:relative; z-index:2;}
+  .card{
+    background:var(--paper);
+    border-radius:var(--radius);
+    box-shadow:0 20px 50px rgba(11,79,158,0.16);
+    padding:36px clamp(20px,5vw,48px) 40px;
+  }
+  .progress{
+    display:flex;
+    gap:8px;
+    margin-bottom:28px;
+  }
+  .progress i{
+    flex:1;
+    height:6px;
+    border-radius:999px;
+    background:var(--line);
+    overflow:hidden;
+  }
+  .progress i.on{background:linear-gradient(90deg,var(--blue-bright),var(--amber));}
+  .step{display:none;}
+  .step.active{display:block; animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  .step h2{font-size:clamp(20px,3.4vw,26px); margin-bottom:6px;}
+  .step .sub{color:var(--ink-soft); font-size:14px; margin-bottom:22px;}
+  .check-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:10px;
+  }
+  .check-item{
+    display:flex; align-items:center; gap:10px;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    cursor:pointer;
+    font-weight:500;
+    font-size:14.5px;
+    transition:border-color .15s, background .15s;
+  }
+  .check-item:hover{border-color:var(--blue-bright);}
+  .check-item input{accent-color:var(--blue-mid); width:18px; height:18px; flex-shrink:0;}
+  .check-item.has-input input[type=checkbox]{margin-top:2px;}
+  .other-text{
+    margin-top:8px; width:100%;
+    border:1.5px solid var(--line); border-radius:10px;
+    padding:10px 12px; font-family:inherit; font-size:14px;
+    display:none;
+  }
+  textarea, input[type=text], input[type=email]{
+    width:100%;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    resize:vertical;
+  }
+  textarea:focus, input:focus{outline:none; border-color:var(--blue-bright); box-shadow:0 0 0 4px rgba(14,165,233,0.15);}
+  textarea{min-height:130px; line-height:1.6; white-space:pre-line;}
+  ::placeholder{color:#6B7A94; opacity:1;}
+  .field-note{color:var(--ink-soft); font-weight:500; font-size:12.5px;}
+  .error-text{display:none; color:#D64545; font-weight:600; font-size:13px; margin-top:10px;}
+  .radio-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:6px;}
+  .radio-pill{
+    display:flex; align-items:center; gap:8px;
+    border:1.5px solid var(--line); border-radius:999px;
+    padding:11px 20px; cursor:pointer; font-weight:600; font-size:14.5px;
+  }
+  .radio-pill input{accent-color:var(--blue-mid);}
+  .conditional{display:none; margin-top:16px;}
+  .field-label{font-weight:700; font-size:13.5px; margin-bottom:8px; display:block; color:var(--ink);}
+  .nav-row{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:30px;
+  }
+  .btn{
+    border:none; border-radius:999px; cursor:pointer;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:15px;
+    padding:13px 26px;
+  }
+  .btn-primary{background:linear-gradient(90deg,var(--blue-mid),var(--blue-bright)); color:#fff; box-shadow:0 10px 22px rgba(43,123,224,0.35);}
+  .btn-primary:hover{filter:brightness(1.05);}
+  .btn-ghost{background:transparent; color:var(--ink-soft); font-weight:600;}
+  .btn-listen{
+    background:linear-gradient(90deg,var(--amber),var(--amber-deep));
+    color:var(--ink); box-shadow:0 10px 22px rgba(240,140,0,0.35);
+    font-size:16px; padding:15px 30px;
+  }
+  .final-actions{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:8px;}
+  .btn-donate{background:transparent; color:var(--blue-mid); border:1.5px solid var(--blue-mid); font-size:15px; padding:14px 26px;}
+  .btn-donate:hover{background:var(--cloud);}
+  .thanks-icon{display:flex; justify-content:center; color:var(--blue-mid); margin-bottom:10px;}
+  .thanks-icon svg{width:42px; height:42px;}
+
+  /* ---------- PROGRAMS (bottom) ---------- */
+  .programs{padding:20px 0 10px;}
+  .section-head{text-align:center; max-width:600px; margin:0 auto 36px;}
+  .section-head .eyebrow{color:var(--blue-mid); font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.06em;}
+  .section-head h2{font-size:clamp(24px,4vw,34px); margin:8px 0 10px;}
+  .section-head p{color:var(--ink-soft); font-size:15px; line-height:1.6;}
+
+  .cover-strip{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+    gap:10px; margin:18px 0 30px;
+  }
+  .cover-strip img{border-radius:10px; aspect-ratio:1/1; object-fit:cover; box-shadow:0 6px 14px rgba(11,79,158,0.15);}
+
+  .featured-program{
+    background:linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+    color:#fff; border-radius:18px; padding:28px clamp(18px,4vw,34px);
+    margin-bottom:30px;
+  }
+  .featured-program .eyebrow2{color:var(--amber); font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;}
+  .featured-program h3{font-size:clamp(19px,3vw,24px); margin-bottom:8px;}
+  .featured-program p{font-size:14.5px; line-height:1.65; color:rgba(255,255,255,0.9); margin:0 0 18px;}
+  .snippet-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px;}
+  .snippet-card{background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:12px; overflow:hidden;}
+  .snippet-card img{aspect-ratio:1/1; object-fit:cover;}
+  .snippet-card span{display:block; padding:9px 10px; font-size:12.5px; font-weight:600; line-height:1.35;}
+
+  .table-wrap{overflow-x:auto; margin-bottom:34px; border-radius:14px; border:1px solid var(--line);}
+  table{width:100%; border-collapse:collapse; background:#fff; font-size:14px;}
+  table caption{
+    text-align:left; font-weight:700; font-family:'Poppins',sans-serif;
+    padding:14px 18px; background:var(--cloud); font-size:15px; color:var(--blue-deep);
+  }
+  th, td{padding:12px 16px; text-align:left; border-top:1px solid var(--line); vertical-align:top;}
+  th{background:var(--cloud); font-weight:700; width:140px; color:var(--blue-deep);}
+
+  .mix-list{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px 22px; margin-bottom:34px;
+    font-size:14.5px; line-height:1.9; color:var(--ink-soft);
+  }
+  .mix-list strong{color:var(--ink);}
+
+  .genre-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin-bottom:34px;}
+  .genre-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px 20px;}
+  .genre-card h3{font-size:15px; color:var(--blue-deep); margin-bottom:8px;}
+  .genre-card p{font-size:13.5px; color:var(--ink-soft); line-height:1.6; margin:0;}
+
+  .dayparts{background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px 22px; margin-bottom:10px; font-size:14.5px; color:var(--ink-soft); line-height:1.9;}
+
+  /* ---------- PARTNERS (bottom) ---------- */
+  .partners{background:#fff; padding:44px 0;}
+  .partner-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+    gap:18px; align-items:center; margin-top:20px;
+  }
+  .partner-grid img{filter:grayscale(15%); opacity:.9; max-height:60px; width:auto; margin:0 auto;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    background:var(--blue-deep); color:rgba(255,255,255,0.85);
+    padding:34px 0; text-align:center; font-size:13.5px;
+  }
+  footer a{color:var(--amber); text-decoration:none; font-weight:600;}
+  footer .foot-tag{margin-bottom:10px; font-weight:700; color:#fff;}
+
+  @media (max-width:640px){
+    .form-section{margin-top:-24px;}
+    .card{padding:26px 18px 30px;}
+    .marquee-track img{height:26px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="broadcast-icon" aria-hidden="true">
+    <svg viewBox="0 0 140 140" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+      <path d="M70 128V58" stroke-width="4"/>
+      <circle cx="70" cy="48" r="7" fill="currentColor" stroke="none"/>
+      <path d="M50 40a28 28 0 0 1 40 0" opacity="0.85"/>
+      <path d="M38 52a46 46 0 0 1 64 0" opacity="0.55"/>
+      <path d="M26 64a64 64 0 0 1 88 0" opacity="0.3"/>
+      <path d="M40 128h60" stroke-width="4"/>
+    </svg>
+  </div>
+  <div class="wrap hero-inner">
+    <span class="hero-kicker">Australian Not-For-Profit Radio</span>
+    <h1>MITE Radio</h1>
+    <div class="tagline">Making IT Easy.</div>
+    <p>We play great songs and music, with tech snippets in between to help you stay secure and get the most out of today's tech, streaming free, anytime, anywhere.</p>
+    <button type="button" class="play-now-btn" onclick="playNow()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Play Now
+    </button>
+    <div class="badge-row">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Decades of Music</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>Tech Tips &amp; Security</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M8.5 12.5L6.5 20l5.5-3 5.5 3-2-7.5"/></svg>100% Australian, Not-For-Profit</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MULTI-STEP FORM ===================== -->
+<section class="form-section wrap">
+  <div class="card">
+    <div class="partners-inline">
+      <h3>Our Partners</h3>
+      <div class="marquee">
+        <div class="marquee-track">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/cyber-west-hub-white-and-blue_orig.png" alt="Cyber West Hub">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/carers-wa_orig.png" alt="Carers WA">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/bunnings_orig.png" alt="Bunnings">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/business-armadale-coc_orig.png" alt="Business Armadale Chamber of Commerce">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/advocare_orig.png" alt="Advocare">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/wa-digital-inclusion-project_orig.png" alt="WA Digital Inclusion Project">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/woolworths_orig.png" alt="Woolworths">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/coles_orig.jpg" alt="Coles">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/officeworks_orig.png" alt="Officeworks">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/australian-government-social-services_orig.png" alt="Australian Government - Social Services">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/quecwa_orig.png" alt="QUECWA">
+          <!-- duplicated for a seamless loop -->
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/cyber-west-hub-white-and-blue_orig.png" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/carers-wa_orig.png" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/bunnings_orig.png" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/business-armadale-coc_orig.png" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/advocare_orig.png" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/wa-digital-inclusion-project_orig.png" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/woolworths_orig.png" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/coles_orig.jpg" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/officeworks_orig.png" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/australian-government-social-services_orig.png" alt="" aria-hidden="true">
+          <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/quecwa_orig.png" alt="" aria-hidden="true">
+        </div>
+      </div>
+    </div>
+    <div class="progress">
+      <i class="on" data-step-dot="1"></i>
+      <i data-step-dot="2"></i>
+      <i data-step-dot="3"></i>
+      <i data-step-dot="4"></i>
+    </div>
+
+    <form id="storyForm">
+      <!-- Honeypot: real visitors never see or fill this. Bots that
+           auto-fill every field trip it, and the submission is discarded. -->
+      <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+        <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="step active" data-step="1">
+        <div class="hero-message" id="heroMessage">Help us improve by letting us know a bit more about your expectations.</div>
+        <h2>What do you want to hear?</h2>
+        <div class="sub">Pick as many as you like. This just helps us know what to play more of.</div>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" name="categories" value="Decades Music (20s-90s)">Decades Music (20s–90s)</label>
+          <label class="check-item"><input type="checkbox" name="categories" value="Rock">Rock</label>
+          <label class="check-item"><input type="checkbox" name="categories" value="Soul / Jazz / Blues">Soul / Jazz / Blues</label>
+          <label class="check-item"><input type="checkbox" name="categories" value="Disco">Disco</label>
+          <label class="check-item"><input type="checkbox" name="categories" value="Folk &amp; Country-adjacent">Folk &amp; Country-adjacent</label>
+          <label class="check-item"><input type="checkbox" name="categories" value="Crooners &amp; Standards">Crooners &amp; Standards</label>
+          <label class="check-item"><input type="checkbox" name="categories" value="Tech Tips &amp; Gadget Talk">Tech Tips &amp; Gadget Talk</label>
+          <label class="check-item"><input type="checkbox" name="categories" value="Community Stories &amp; Local Voices">Community Stories &amp; Local Voices</label>
+          <label class="check-item has-input" style="align-items:flex-start; flex-direction:column;">
+            <span style="display:flex; align-items:center; gap:10px;"><input type="checkbox" id="otherCheck" name="categories" value="Other">Other</span>
+            <input type="text" class="other-text" id="otherText" name="other_category" placeholder="Tell us what you're after...">
+          </label>
+        </div>
+        <div class="error-text" id="step1Error">Pick at least one option to continue.</div>
+        <div class="nav-row">
+          <span></span>
+          <button type="button" class="btn btn-primary" onclick="validateStep1()">Next</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step" data-step="2">
+        <h2>Do you have a tech story you want to share?</h2>
+        <div class="sub">We'll share it on air, and if it's interesting, we may reach out to hear more. This one's optional, skip it if you'd rather not.</div>
+        <textarea name="tech_story" id="techStory" placeholder="Like the time you were scammed,&#10;or nearly scammed..."></textarea>
+        <div class="nav-row">
+          <button type="button" class="btn btn-ghost" onclick="goStep(1)">Back</button>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn btn-ghost" onclick="skipStep2()">Skip</button>
+            <button type="button" class="btn btn-primary" onclick="goStep(3)">Next</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step" data-step="3">
+        <h2>How should we credit your story?</h2>
+        <div class="sub">Totally up to you.</div>
+        <div class="radio-row">
+          <label class="radio-pill"><input type="radio" name="credit" value="anonymous" checked onclick="toggleName(false)">Share anonymously</label>
+          <label class="radio-pill"><input type="radio" name="credit" value="named" onclick="toggleName(true)">Share with my name</label>
+          <label class="radio-pill"><input type="radio" name="credit" value="na" onclick="toggleName(false)">Not applicable</label>
+        </div>
+        <div class="conditional" id="nameField">
+          <span class="field-label">Your name</span>
+          <input type="text" name="name" placeholder="First name is fine">
+        </div>
+        <div style="margin-top:20px;">
+          <span class="field-label">Email <span class="field-note">(optional), so we can get in touch if we'd like to feature you</span></span>
+          <input type="email" name="email" placeholder="you@example.com">
+        </div>
+        <div class="nav-row">
+          <button type="button" class="btn btn-ghost" onclick="goStep(2)">Back</button>
+          <button type="button" class="btn btn-primary" onclick="submitAndAdvance()">Submit</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step" data-step="4">
+        <div class="thanks-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0118 0v6"/><rect x="3" y="15" width="4.5" height="6" rx="1.2"/><rect x="16.5" y="15" width="4.5" height="6" rx="1.2"/></svg>
+        </div>
+        <h2 style="text-align:center;">You're all set.</h2>
+        <div class="sub" style="text-align:center;">Thanks for sharing. Now let's get you listening.</div>
+        <div class="final-actions">
+          <button type="button" class="btn btn-listen" onclick="fireListenConversion(LISTEN_NOW_URL)">Listen Now</button>
+          <button type="button" class="btn btn-donate" onclick="goTop(DONATE_URL)">Support MITE Radio</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ===================== PROGRAMS ===================== -->
+<section class="programs wrap">
+  <div class="section-head">
+    <div class="eyebrow">On Air</div>
+    <h2>Our Programs</h2>
+    <p>From 1920s classics to today's tech headlines, here's what's playing across the week.</p>
+  </div>
+
+  <div class="cover-strip">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/50pop2.png" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/50rolling-cover.png" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/aa80s-cover.png" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/abc-cover.jpg" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/bestdisco-cover.jpg" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/cort-cover.png" alt="">
+  </div>
+
+  <div class="featured-program">
+    <div class="eyebrow2">Featured Program</div>
+    <h3>Making IT Easy with Tony &amp; Kay</h3>
+    <p>Weekdays 11am WST, repeating 11pm WST. Your daily dose of tech with a twist: an Innovation Hub, tech freebies in Somethin' for Nothin', laughs in The Tech Absurd, and practical Tips &amp; Tricks.</p>
+    <div class="snippet-grid">
+      <a class="snippet-card" href="https://www.miteradio.com.au/blog/huawei-matebook-fold">
+        <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/published/screenshot-2026-09-14-143022.png" alt="Huawei MateBook Fold">
+        <span>Huawei MateBook Fold</span>
+      </a>
+      <a class="snippet-card" href="https://www.miteradio.com.au/blog/chrome-reader-mode">
+        <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/screenshot-2026-09-11-093415_orig.png" alt="Chrome Reader Mode">
+        <span>Chrome Reader Mode</span>
+      </a>
+      <a class="snippet-card" href="https://www.miteradio.com.au/blog/do-i-need-malware-protection">
+        <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/ep360-05-do-i-need-malware-protection-pic2_orig.png" alt="Do I Need Malware Protection">
+        <span>Do I Need Malware Protection?</span>
+      </a>
+      <a class="snippet-card" href="https://www.miteradio.com.au/blog/sewbots">
+        <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/ep360-03-sewbots_orig.png" alt="Sewbots">
+        <span>Sewbots</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <caption>By Decade</caption>
+      <tbody>
+        <tr><th>1920s–40s</th><td>Arvo Roaring 20s-40s</td></tr>
+        <tr><th>1950s</th><td>Arvo 50s, Brian James Fab 50s, Dave Marley Classic Chart Rundown 50s</td></tr>
+        <tr><th>1960s</th><td>Arvo 60s, Flashback to the 60s with Jim Barrington, Brian James Fab 60s, The Swinging Sixties with Gordon Cooper, Dave Marley Classic Chart Rundown 60s</td></tr>
+        <tr><th>1970s</th><td>Arvo 70s, Chris Palin's 70s, Steve Algar All 70s Show, The Sensational 70s with Gordon Cooper, Dave Marley Classic Chart Rundown 70s</td></tr>
+        <tr><th>1980s</th><td>Arvo 80s, Chris Palin's 80s, All About The 80s with Rob Charles, The Electric 80s Show with Gordon Cooper, Blast from the 80s with Gary Hopkins, Dave Marley Classic Chart Rundown 80s</td></tr>
+        <tr><th>1990s+</th><td>Blast from the 90s with Gary Hopkins, Dave Marley Classic Chart Rundown 90s/00s</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mix-list">
+    <strong>Multi-Decade &amp; General Oldies Mix</strong><br>
+    Hits of the 50s to 90s with MITE Radio · Overnight Hits of the 50s to 90s · Glenn &amp; Tracy's Timeless Tracks · 50 Years of Pop with Peter Kirkpatrick · 50 Years and Rolling with Leo Kirby · Steve Bishop's Old Record Club · Choice Cuts with Kevin Butcher · The Vinyl Countdown with Jonathan Charles · Solid Gold Sounds with Chris Pitchford · Solid Gold with Kevin Dinnigan · The Time Of Our Music Life · Oldies with an Oldie with Gordon Cooper · Dave's Golden Oldies · The Red Carpet with Ann · On The Sunny Side of the Street with Ken Anton · Time After Time with Ken Anton · The Peter Nightingale Show · Woolfy's Retro Chart Show · Decades Breakfast with Mark Gale
+  </div>
+
+  <div class="cover-strip">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/db-cover.jpg" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/dd-cover.jpg" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/dgo-cover.png" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/es-cover.png" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/fbtt60s-cover.png" alt="">
+    <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/hqs-cover.jpg" alt="">
+  </div>
+
+  <div class="genre-grid">
+    <div class="genre-card"><h3>Rock</h3><p>Rock's Easy Rock Experience, Rock's Golden Years, Gordon Cooper Soft Rock, One Hit Wonders (Gordon Cooper), No More Heroes, UK USA Rock N Soul Connection</p></div>
+    <div class="genre-card"><h3>Soul / Jazz / Blues</h3><p>Soul Vault with David Southway, Jazz Fusion, The Blues Hotel with Kelvin Huggins</p></div>
+    <div class="genre-card"><h3>Disco</h3><p>The Best Disco In Town</p></div>
+    <div class="genre-card"><h3>Folk / Country-adjacent</h3><p>Martin's Folk Show, Bush, Bards and Banter with Neville Greenwood</p></div>
+    <div class="genre-card"><h3>Crooners / Standards</h3><p>Dinner with the Crooners</p></div>
+    <div class="genre-card"><h3>Deep Cuts / Specialist</h3><p>Deeper Dimensions with David Dyke, The Vowel Show with Gordon Cooper</p></div>
+  </div>
+
+  <div class="dayparts">
+    <strong>Daypart &amp; Format Shows:</strong> Cort In The Morning · ABC Oldies with JP McCartney · Late Night in the Attic with Brian James · Easy Sunday with Al and Tracy · Wayback Saturday Night · First Last Radio Show · Frieghties with Gozz · Steve Algar's Sunday Smoothie / Wednesday Night Takeaway
+  </div>
+</section>
+
+<!-- ===================== PARTNERS (full section) ===================== -->
+<section class="partners">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">With Thanks</div>
+      <h2>Our Partners &amp; Well-Wishers</h2>
+      <p>MITE Radio runs thanks to the support of these organisations. <a href="https://www.miteradio.com.au/thank-you.html" style="color:var(--blue-mid);">See the full thank-you page &rarr;</a></p>
+    </div>
+    <div class="partner-grid">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/cyber-west-hub-white-and-blue_orig.png" alt="Cyber West Hub">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/carers-wa_orig.png" alt="Carers WA">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/bunnings_orig.png" alt="Bunnings">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/business-armadale-coc_orig.png" alt="Business Armadale Chamber of Commerce">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/advocare_orig.png" alt="Advocare">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/wa-digital-inclusion-project_orig.png" alt="WA Digital Inclusion Project">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/woolworths_orig.png" alt="Woolworths">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/coles_orig.jpg" alt="Coles">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/officeworks_orig.png" alt="Officeworks">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/australian-government-social-services_orig.png" alt="Australian Government - Social Services">
+      <img src="https://www.miteradio.com.au/uploads/2/1/4/8/21480370/quecwa_orig.png" alt="QUECWA">
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-tag">MITE Radio: Making IT Easy</div>
+    <p>MITE Radio is a not-for-profit Australian community radio station.</p>
+    <p><a href="https://www.miteradio.com.au/terms-conditions.html">Privacy Policy</a> &nbsp;·&nbsp; <a href="https://www.miteradio.com.au/">miteradio.com.au</a></p>
+  </div>
+</footer>
+
+<script>
+  // ---------- Multi-step navigation ----------
+  function goStep(n){
+    document.querySelectorAll('.step').forEach(s => s.classList.toggle('active', s.dataset.step == n));
+    document.querySelectorAll('[data-step-dot]').forEach(d => d.classList.toggle('on', d.dataset.stepDot <= n));
+    window.scrollTo({top: document.querySelector('.form-section').offsetTop - 20, behavior:'smooth'});
+  }
+
+  function toggleName(show){
+    document.getElementById('nameField').style.display = show ? 'block' : 'none';
+  }
+
+  document.getElementById('otherCheck').addEventListener('change', function(){
+    document.getElementById('otherText').style.display = this.checked ? 'block' : 'none';
+  });
+
+  function playNow(){
+    document.getElementById('heroMessage').style.display = 'block';
+    window.scrollTo({top: document.querySelector('.form-section').offsetTop - 20, behavior:'smooth'});
+  }
+
+  function validateStep1(){
+    const checked = document.querySelectorAll('input[name="categories"]:checked').length;
+    const errorEl = document.getElementById('step1Error');
+    if (checked === 0) {
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+    goStep(2);
+  }
+
+  function skipStep2(){
+    document.getElementById('techStory').value = '';
+    goStep(3);
+  }
+
+  function submitAndAdvance(){
+    const form = document.getElementById('storyForm');
+    const data = new FormData(form);
+    data.append('datePrime', datePrime);
+    data.append('gclid', new URLSearchParams(window.location.search).get('gclid') || '');
+    if (FORM_ENDPOINT && FORM_ENDPOINT.indexOf('REPLACE_ME') === -1) {
+      // mode:'no-cors' + no custom headers: Apps Script doesn't send CORS
+      // headers back, and a custom header here would trigger a blocked
+      // preflight request. We don't need to read the response anyway.
+      fetch(FORM_ENDPOINT, { method:'POST', mode:'no-cors', body:data }).catch(()=>{});
+    }
+    goStep(4);
+  }
+
+  // ---------- Rotating story placeholder ----------
+  const storyPrompts = [
+    "Like the time when you were scammed,\nor nearly scammed...",
+    "Like the time your friend, family member,\nor colleague was scammed, or nearly was...",
+    "Like the time you were so impressed\nby a gadget or piece of software...",
+    "Like the time a piece of tech, a gadget,\nor software changed your life..."
+  ];
+  let promptIndex = 0;
+  const techStoryEl = document.getElementById('techStory');
+  let rotateTimer = setInterval(() => {
+    promptIndex = (promptIndex + 1) % storyPrompts.length;
+    techStoryEl.setAttribute('placeholder', storyPrompts[promptIndex]);
+  }, 3200);
+  techStoryEl.addEventListener('focus', () => clearInterval(rotateTimer));
+</script>
+
+</body>
+</html>
