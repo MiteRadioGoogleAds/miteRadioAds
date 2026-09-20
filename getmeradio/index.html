@@ -49,17 +49,38 @@
     catch(e){ window.location.href = url; }
   }
 
-  function fireListenConversion(destination){
+  // One named tab is reused for the stream, so a repeat call refreshes it instead of stacking tabs.
+  const PLAYER_TAB = "miteRadioPlayer";
+  let playerWin = null;
+  let conversionFired = false;
+
+  function fireConversionOnce(source){
+    if (conversionFired) return;
+    conversionFired = true;
     if (typeof gtag === 'function') {
       gtag('event', 'conversion', {
-        'send_to': GA_CONVERSION_ID + '/' + GA_CONVERSION_LABEL,
-        'event_callback': function(){ goTop(destination); }
+        'send_to': GA_CONVERSION_ID + '/' + GA_CONVERSION_LABEL
       });
-      // Safety net: if the callback never fires (blocker, slow network), still leave.
-      setTimeout(function(){ goTop(destination); }, 600);
-    } else {
-      goTop(destination);
     }
+    logEvent(source);
+  }
+
+  // Records the same moment in the Sheet's PlayClicks tab (keepalive so it survives a same-tab redirect).
+  function logEvent(source){
+    if (!FORM_ENDPOINT || FORM_ENDPOINT.indexOf('REPLACE_ME') !== -1) return;
+    const data = new FormData();
+    data.append('event', source);
+    data.append('variant', location.pathname.split('/').filter(s => s && s !== 'index.html').pop() || '');
+    data.append('gclid', new URLSearchParams(location.search).get('gclid') || '');
+    data.append('datePrime', datePrime);
+    fetch(FORM_ENDPOINT, { method:'POST', mode:'no-cors', body:data, keepalive:true }).catch(()=>{});
+  }
+
+  // Call straight from a click, or the browser blocks the new tab.
+  function openPlayer(refresh){
+    if (!refresh && playerWin && !playerWin.closed) { playerWin.focus(); return; }
+    playerWin = window.open(LISTEN_NOW_URL, PLAYER_TAB);
+    if (!playerWin) goTop(LISTEN_NOW_URL);
   }
 </script>
 
@@ -519,7 +540,7 @@
         <h2 style="text-align:center;">You're all set.</h2>
         <div class="sub" style="text-align:center;">Thanks for sharing. Now let's get you listening.</div>
         <div class="final-actions">
-          <button type="button" class="btn btn-listen" onclick="fireListenConversion(LISTEN_NOW_URL)">Listen Now</button>
+          <button type="button" class="btn btn-listen" onclick="listenNow()">Listen Now</button>
           <button type="button" class="btn btn-donate" onclick="goTop(DONATE_URL)">Support MITE Radio</button>
         </div>
       </div>
@@ -662,6 +683,13 @@
   function playNow(){
     document.getElementById('heroMessage').style.display = 'block';
     window.scrollTo({top: document.querySelector('.form-section').offsetTop - 20, behavior:'smooth'});
+    fireConversionOnce('play_now');
+    openPlayer(false);
+  }
+
+  function listenNow(){
+    fireConversionOnce('listen_now');
+    openPlayer(true);
   }
 
   function validateStep1(){
