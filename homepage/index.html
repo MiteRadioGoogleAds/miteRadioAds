@@ -115,6 +115,7 @@
     data.append('event', source);
     data.append('variant', location.pathname.split('/').filter(s => s && s !== 'index.html').pop() || '');
     data.append('gclid', new URLSearchParams(location.search).get('gclid') || '');
+    data.append('campaign', new URLSearchParams(location.search).get('campaign') || '');
     data.append('datePrime', datePrime);
     fetch(FORM_ENDPOINT, { method:'POST', mode:'no-cors', body:data, keepalive:true }).catch(()=>{});
   }
@@ -759,6 +760,7 @@
     const data = new FormData(form);
     data.append('datePrime', datePrime);
     data.append('gclid', new URLSearchParams(window.location.search).get('gclid') || '');
+    data.append('campaign', new URLSearchParams(window.location.search).get('campaign') || '');
     if (FORM_ENDPOINT && FORM_ENDPOINT.indexOf('REPLACE_ME') === -1) {
       // mode:'no-cors' + no custom headers: Apps Script doesn't send CORS
       // headers back, and a custom header here would trigger a blocked
